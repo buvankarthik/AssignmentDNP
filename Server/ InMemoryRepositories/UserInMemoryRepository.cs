@@ -6,6 +6,10 @@ namespace InMemoryRepositories;
 public class UserInMemoryRepository : IUserRepository
 {
     public List<User> users;
+    //Dummy data
+    User user1 = new User(1, "Nandor69", "iluvallpeople");
+    User user2 = new User(2, "Gman67", "12345678");
+    User user3 = new User(3, "BigA", "claude_is_my_boo");
     
     public Task<User> AddAsync(User user)
     {

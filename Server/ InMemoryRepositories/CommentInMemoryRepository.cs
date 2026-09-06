@@ -6,6 +6,9 @@ namespace InMemoryRepositories;
 public class CommentInMemoryRepository : ICommentRepository
 {
     public List<Comment> comments;
+    //Dummy data
+    Comment comment1 = new Comment(1, "Love the message! Stay positive!", 2, 1);
+    Comment comment2 = new Comment(2, "can i borrow your hotspot pls", 2, 2);
     
     public Task<Comment> AddAsync(Comment comment)
     {
