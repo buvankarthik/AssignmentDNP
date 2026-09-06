@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "Server\Entities
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepositoryContracts", "Server\RepositoryContracts\RepositoryContracts.csproj", "{E739BB3B-2A3A-44F2-958D-98156AC155C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InMemoryRepositories", "Server\ InMemoryRepositories\InMemoryRepositories.csproj", "{32BB9F67-8BF6-4D46-B058-DA467D2212F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,9 +22,14 @@ Global
 		{E739BB3B-2A3A-44F2-958D-98156AC155C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E739BB3B-2A3A-44F2-958D-98156AC155C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E739BB3B-2A3A-44F2-958D-98156AC155C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32BB9F67-8BF6-4D46-B058-DA467D2212F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32BB9F67-8BF6-4D46-B058-DA467D2212F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32BB9F67-8BF6-4D46-B058-DA467D2212F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32BB9F67-8BF6-4D46-B058-DA467D2212F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{70631B58-FE75-4C3D-A356-487200D8BF69} = {7BC66F23-03EC-4CB1-9227-BEDCF6120561}
 		{E739BB3B-2A3A-44F2-958D-98156AC155C8} = {7BC66F23-03EC-4CB1-9227-BEDCF6120561}
+		{32BB9F67-8BF6-4D46-B058-DA467D2212F3} = {7BC66F23-03EC-4CB1-9227-BEDCF6120561}
 	EndGlobalSection
 EndGlobal
