@@ -6,10 +6,15 @@ namespace InMemoryRepositories;
 
 public class PostInMemoryRepository : IPostRepository
 {
-    public List<Post> posts;
-    //Dummy data
-    Post post1 = new Post(1, "Spread Love", "I love all people from all backgrounds!", 1);
-    Post post2 = new Post(2,"Tutorial for vibecoding", "Today I will teach how to vibecode", 3);
+    public List<Post> posts = new List<Post>();
+   
+    public PostInMemoryRepository()
+    {
+        Post post1 = new Post(1, "Spread Love", "I love all people from all backgrounds!", 1);
+        Post post2 = new Post(2,"Tutorial for vibecoding", "Today I will teach how to vibecode", 3);
+        posts.Add(post1);
+        posts.Add(post2);
+    }
     
     public Task<Post> AddAsync(Post post)
     {
