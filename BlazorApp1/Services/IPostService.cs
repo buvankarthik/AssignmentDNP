@@ -1,4 +1,6 @@
-﻿namespace BlazorApp1.Services;
+﻿using APIContracts.PostsDtos;
+
+namespace BlazorApp1.Services;
 
 public interface IPostService {
     public Task<PostDto> AddPostAsync(CreatePostDto request);

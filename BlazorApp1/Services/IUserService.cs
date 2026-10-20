@@ -1,4 +1,6 @@
-﻿namespace BlazorApp1.Services;
+﻿using APIContracts;
+
+namespace BlazorApp1.Services;
 
 public interface IUserService {
     public Task<UserDto> AddUserAsync(CreateUserDto request);
