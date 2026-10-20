@@ -1,4 +1,5 @@
-﻿using APIContracts;
+﻿using System.Text.Json;
+using APIContracts;
 
 namespace BlazorApp1.Services;
 
@@ -12,9 +13,18 @@ public class HttpUserService : IUserService
         this.httpClient = httpClient;
     }
     
-    public Task<UserDto> AddUserAsync(CreateUserDto request)
+    public async Task<UserDto> AddUserAsync(CreateUserDto request)
     {
-        throw new NotImplementedException();
+        HttpResponseMessage httpResponse = await httpClient.PostAsJsonAsync("users", request);
+        string response = await httpResponse.Content.ReadAsStringAsync();
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            throw new Exception(response);
+        }
+        return JsonSerializer.Deserialize<UserDto>( response, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
     }
 
     public Task UpdateUserSync(int id, UpdateUserDto request)
