@@ -7,6 +7,8 @@ public class HttpUserService : IUserService
 {
     
     private readonly HttpClient httpClient;
+    private static readonly JsonSerializerOptions jsonOptions = 
+        new() { PropertyNameCaseInsensitive = true };
 
     public HttpUserService(HttpClient httpClient)
     {
@@ -21,24 +23,52 @@ public class HttpUserService : IUserService
         {
             throw new Exception(response);
         }
-        return JsonSerializer.Deserialize<UserDto>( response, new JsonSerializerOptions
+        return JsonSerializer.Deserialize<UserDto>( response, jsonOptions);
+    }
+
+    public async Task UpdateUserSync(int id, UpdateUserDto request)
+    {
+        HttpResponseMessage httpResponse = await httpClient.PutAsJsonAsync($"users/{id}", request);
+        if (!httpResponse.IsSuccessStatusCode)
         {
-            PropertyNameCaseInsensitive = true
-        });
+            throw new Exception(await httpResponse.Content.ReadAsStringAsync());
+        }
     }
 
-    public Task UpdateUserSync(int id, UpdateUserDto request)
+    public async Task<UserDto> GetSingleAsync(int id)
     {
-        throw new NotImplementedException();
+        HttpResponseMessage httpResponse = await httpClient.GetAsync($"users/{id}");
+        string response = await httpResponse.Content.ReadAsStringAsync();
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            throw new Exception(response);
+        }
+        return JsonSerializer.Deserialize<UserDto>( response, jsonOptions )!;
     }
 
-    public Task<UserDto> GetSingleAsync(int id, UserDto userDto)
+    public async Task<IEnumerable<UserDto>> GetManyAsync(string? nameContains = null)
     {
-        throw new NotImplementedException();
+        string url = "users";
+        if (!string.IsNullOrWhiteSpace(nameContains))
+        {
+            url += $"?nameContains={Uri.EscapeDataString(nameContains)}";
+        }
+        HttpResponseMessage httpResponse = await httpClient.GetAsync(url);
+        string response = await httpResponse.Content.ReadAsStringAsync();
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            throw new Exception(response);
+        }
+        return JsonSerializer.Deserialize<List<UserDto>>( response, jsonOptions)!;
     }
-
-    public Task<UserDto> GetMany(int id, UserDto userDto)
+    
+    public async Task DeleteUserAsync(int id)
     {
-        throw new NotImplementedException();
+        HttpResponseMessage httpResponse = await httpClient.DeleteAsync($"users/{id}");
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            throw new Exception(await httpResponse.Content.ReadAsStringAsync());
+        }
     }
+    
 }
