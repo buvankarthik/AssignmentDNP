@@ -26,7 +26,7 @@ public class HttpUserService : IUserService
         return JsonSerializer.Deserialize<UserDto>( response, jsonOptions);
     }
 
-    public async Task UpdateUserSync(int id, UpdateUserDto request)
+    public async Task UpdateUserAsync(int id, UpdateUserDto request)
     {
         HttpResponseMessage httpResponse = await httpClient.PutAsJsonAsync($"users/{id}", request);
         if (!httpResponse.IsSuccessStatusCode)

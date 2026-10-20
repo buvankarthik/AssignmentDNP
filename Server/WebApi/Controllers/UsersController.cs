@@ -7,11 +7,11 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UserController : ControllerBase
+public class UsersController : ControllerBase
 {
     private readonly IUserRepository userRepository;
 
-    public UserController(IUserRepository userRepository)
+    public UsersController(IUserRepository userRepository)
     {
         this.userRepository = userRepository;
     }
@@ -28,12 +28,13 @@ public class UserController : ControllerBase
             Id = created.UserId,
             UserName = created.Name
         };
-    return Created($"/User/{dto.Id}", created);
+        return Created($"/users/{dto.Id}", dto);
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult<UserDto>> UpdateUser([FromRoute] int id ,[FromBody] UpdateUserDto request)
     {
+        await VerifyUserNameIsAvailableAsync(request.UserName, id);
         User user = new(id, request.UserName, request.Password);
         await userRepository.UpdateAsync(user);
         return NoContent();

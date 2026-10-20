@@ -1,0 +1,74 @@
+﻿@page "/posts/{Id:int}"
+@rendermode InteractiveServer
+@inject IPostService PostService
+@inject IUserService UserService
+@inject ICommentService CommentService
+
+@if (error is not null) { <p>@error</p> }
+@if (post is not null)
+{
+    <h3>@post.Title</h3>
+    <p><i>by @AuthorName(post.UserId)</i></p>
+    <p>@post.Body</p>
+
+    <h4>Comments</h4>
+    @foreach (CommentDto c in comments)
+    {
+        <div><b>@AuthorName(c.UserId):</b> @c.Body</div>
+    }
+
+    <h5>Add comment</h5>
+    <select @bind="commentUserId">
+        @foreach (KeyValuePair<int, string> u in userNames) { <option value="@u.Key">@u.Value</option> }
+    </select>
+    <textarea @bind="commentBody"></textarea>
+    <button class="btn btn-primary" @onclick="AddCommentAsync">Add</button>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private PostDto? post;
+    private List<CommentDto> comments = new();
+    private Dictionary<int, string> userNames = new();
+    private int commentUserId;
+    private string commentBody = "";
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            post = await PostService.GetSingleAsync(Id);
+            userNames = (await UserService.GetManyAsync()).ToDictionary(u => u.Id, u => u.UserName);
+            if (userNames.Count > 0) commentUserId = userNames.Keys.First();
+            await LoadCommentsAsync();
+        }
+        catch (Exception e)
+        {
+            error = e.Message;
+        }
+    }
+
+    private async Task LoadCommentsAsync()
+    {
+        comments = (await CommentService.GetManyAsync(postId: Id)).ToList();
+    }
+
+    private async Task AddCommentAsync()
+    {
+        try
+        {
+            await CommentService.AddCommentAsync(new CreateCommentDto { Body = commentBody, UserId = commentUserId, PostId = Id });
+            commentBody = "";
+            error = null;
+            await LoadCommentsAsync();
+        }
+        catch (Exception e)
+        {
+            error = e.Message;
+        }
+    }
+
+    private string AuthorName(int id) => userNames.TryGetValue(id, out string? name) ? name : "unknown";
+}

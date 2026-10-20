@@ -24,6 +24,8 @@ public class CommentsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CommentDto>> AddComment([FromBody] CreateCommentDto request)
     {
+        await userRepository.GetSingleAsync(request.UserId);
+        await postRepository.GetSingleAsync(request.PostId);
         Comment comment = new (0, request.Body, request.UserId, request.PostId);
         Comment created = await commentRepository.AddAsync(comment);
         CommentDto dto = new()

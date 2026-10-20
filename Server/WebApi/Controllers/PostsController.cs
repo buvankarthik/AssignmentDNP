@@ -22,7 +22,7 @@ public class PostsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PostDto>> AddPost([FromBody] CreatePostDto request)
     {
-
+        await userRepository.GetSingleAsync(request.UserId);
         Post post = new (0, request.Title, request.Body, request.UserId);
         Post created = await postRepository.AddAsync(post);
         PostDto dto = new()

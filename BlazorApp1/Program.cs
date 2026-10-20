@@ -7,6 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri("https://localhost:7297")
+});
+builder.Services.AddScoped<IUserService, HttpUserService>();
+builder.Services.AddScoped<IPostService, HttpPostService>();
+builder.Services.AddScoped<ICommentService, HttpCommentService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,12 +35,5 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-builder.Services.AddScoped(sp => new HttpClient
-{
-    BaseAddress = new Uri("https://localhost:7297")
-});
-builder.Services.AddScoped<IUserService, HttpUserService>();
-builder.Services.AddScoped<IPostService, HttpPostService>();
-builder.Services.AddScoped<ICommentService, HttpCommentService>();
 
 app.Run();
