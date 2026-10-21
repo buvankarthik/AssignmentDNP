@@ -7,7 +7,6 @@
         <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\APIContracts\APIContracts.csproj" />
         <ProjectReference Include="..\APIContracts\APIContracts.csproj" />
     </ItemGroup>
 </Project>
