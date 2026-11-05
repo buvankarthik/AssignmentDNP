@@ -1,4 +1,8 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using BlazorApp1.Auth
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager NavMgr
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">BlazorApp1</a>
     </div>
@@ -15,7 +19,27 @@
         </div>
 
         <div class="nav-item px-3"><NavLink class="nav-link" href="users/create">Create user</NavLink></div>
-        <div class="nav-item px-3"><NavLink class="nav-link" href="posts/create">Create post</NavLink></div>
         <div class="nav-item px-3"><NavLink class="nav-link" href="posts">Posts</NavLink></div>
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3"><NavLink class="nav-link" href="posts/create">Create post</NavLink></div>
+                <div class="nav-item px-3">
+                    <button class="nav-link btn btn-link" @onclick="Logout">Log out (@context.User.Identity?.Name)</button>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3"><NavLink class="nav-link" href="login">Log in</NavLink></div>
+            </NotAuthorized>
+        </AuthorizeView>
+        
     </nav>
 </div>
+
+@code {
+    private void Logout()
+    {
+        ((SimpleAuthProvider)AuthProvider).Logout();
+        NavMgr.NavigateTo("/");
+    }
+}

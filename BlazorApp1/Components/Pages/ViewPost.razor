@@ -3,6 +3,7 @@
 @inject IPostService PostService
 @inject IUserService UserService
 @inject ICommentService CommentService
+@inject NavigationManager NavMgr
 
 @if (error is not null) { <p>@error</p> }
 @if (post is not null)
@@ -11,6 +12,11 @@
     <p><i>by @AuthorName(post.UserId)</i></p>
     <p>@post.Body</p>
 
+    @if (currentUserId == post.UserId)
+    {
+        <button class="btn btn-danger" @onclick="DeletePostAsync">Delete post</button>
+    }
+
     <h4>Comments</h4>
     @foreach (CommentDto c in comments)
     {
@@ -18,20 +24,25 @@
     }
 
     <h5>Add comment</h5>
-    <select @bind="commentUserId">
-        @foreach (KeyValuePair<int, string> u in userNames) { <option value="@u.Key">@u.Value</option> }
-    </select>
-    <textarea @bind="commentBody"></textarea>
-    <button class="btn btn-primary" @onclick="AddCommentAsync">Add</button>
+    @if (currentUserId is not null)
+    {
+        <textarea @bind="commentBody"></textarea>
+        <button class="btn btn-primary" @onclick="AddCommentAsync">Add</button>
+    }
+    else
+    {
+        <p><a href="login">Log in</a> to add a comment.</p>
+    }
 }
 
 @code {
     [Parameter] public int Id { get; set; }
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; } = null!;
 
     private PostDto? post;
     private List<CommentDto> comments = new();
     private Dictionary<int, string> userNames = new();
-    private int commentUserId;
+    private int? currentUserId;
     private string commentBody = "";
     private string? error;
 
@@ -39,9 +50,15 @@
     {
         try
         {
+            AuthenticationState authenticationState = await State;
+            ClaimsPrincipal claimsPrincipal = authenticationState.User;
+            if (claimsPrincipal.Identity?.IsAuthenticated == true)
+            {
+                currentUserId = int.Parse(claimsPrincipal.Claims.Single(c => c.Type == "Id").Value);
+            }
+
             post = await PostService.GetSingleAsync(Id);
             userNames = (await UserService.GetManyAsync()).ToDictionary(u => u.Id, u => u.UserName);
-            if (userNames.Count > 0) commentUserId = userNames.Keys.First();
             await LoadCommentsAsync();
         }
         catch (Exception e)
@@ -57,12 +74,26 @@
 
     private async Task AddCommentAsync()
     {
+        if (currentUserId is null) return;
         try
         {
-            await CommentService.AddCommentAsync(new CreateCommentDto { Body = commentBody, UserId = commentUserId, PostId = Id });
+            await CommentService.AddCommentAsync(new CreateCommentDto { Body = commentBody, UserId = currentUserId.Value, PostId = Id });
             commentBody = "";
             error = null;
             await LoadCommentsAsync();
+        }
+        catch (Exception e)
+        {
+            error = e.Message;
+        }
+    }
+
+    private async Task DeletePostAsync()
+    {
+        try
+        {
+            await PostService.DeletePostAsync(Id);
+            NavMgr.NavigateTo("/posts");
         }
         catch (Exception e)
         {

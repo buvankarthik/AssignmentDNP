@@ -1,22 +1,17 @@
 ﻿@page "/posts/create"
+@attribute [Authorize]
 @rendermode InteractiveServer
 @inject IPostService PostService
-@inject IUserService UserService
 
 <h3>Create post</h3>
-<div>
-    <label>Author</label>
-    <select @bind="userId">
-        @foreach (UserDto u in users) { <option value="@u.Id">@u.UserName</option> }
-    </select>
-</div>
 <div><label>Title</label> <input @bind="title" /></div>
 <div><label>Body</label> <textarea @bind="body"></textarea></div>
 <button class="btn btn-primary" @onclick="CreateAsync">Create</button>
 @if (message is not null) { <p>@message</p> }
 
 @code {
-    private List<UserDto> users = new();
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; } = null!;
+
     private int userId;
     private string title = "";
     private string body = "";
@@ -24,8 +19,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        users = (await UserService.GetManyAsync()).ToList();
-        if (users.Count > 0) userId = users[0].Id;
+        AuthenticationState authenticationState = await State;
+        ClaimsPrincipal claimsPrincipal = authenticationState.User;
+        userId = int.Parse(claimsPrincipal.Claims.Single(c => c.Type == "Id").Value);
     }
 
     private async Task CreateAsync()
