@@ -9,6 +9,6 @@ POST https://localhost:7297/auth/login
 Content-Type: application/json
 
 {
-  "userName": "Bob",
-  "password": "12345"
+  "userName": "Achilleas",
+  "password": "123456"
 }
