@@ -4,3 +4,11 @@ GET {{WebApi_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+POST https://localhost:7297/auth/login
+Content-Type: application/json
+
+{
+  "userName": "Bob",
+  "password": "12345"
+}
