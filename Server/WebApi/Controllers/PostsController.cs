@@ -3,6 +3,7 @@ using APIContracts.PostsDtos;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApi.Controllers;
 
@@ -39,8 +40,9 @@ public class PostsController : ControllerBase
     public async Task<ActionResult> UpdatePost([FromRoute] int id ,[FromBody] UpdatePostDto request)
     {
         Post existing = await postRepository.GetSingleAsync(id);
-        Post post = new(id, request.Title, request.Body, existing.UserId);
-        await postRepository.UpdateAsync(post);
+        existing.Title = request.Title;
+        existing.Body = request.Body;
+        await postRepository.UpdateAsync(existing);
         return NoContent();
     }
     
@@ -59,7 +61,7 @@ public class PostsController : ControllerBase
     }
     
     [HttpGet]
-    public ActionResult<IEnumerable<PostDto>> GetMany(
+    public async Task<ActionResult<IEnumerable<PostDto>>> GetMany(
         [FromQuery] string? titleContains,
         [FromQuery] int? userId,
         [FromQuery] string? userName)
@@ -68,23 +70,18 @@ public class PostsController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(titleContains))
         {
-            posts = posts.Where(p =>
-                p.Title.Contains(titleContains, StringComparison.OrdinalIgnoreCase));
+            posts = posts.Where(p => p.Title.ToLower().Contains(titleContains.ToLower()));
         }
         if (!string.IsNullOrWhiteSpace(userName))
         {
-            List<int> userIds = userRepository.GetMany()
-                .Where(u => u.Name == userName)
-                .Select(u => u.UserId)
-                .ToList();
-            posts = posts.Where(p => userIds.Contains(p.UserId));
+            posts = posts.Where(p => p.User.Name == userName);
         }
-
         if (userId is not null)
         {
             posts = posts.Where(p => p.UserId == userId);
         }
-        List<PostDto> dtos = posts
+
+        List<PostDto> dtos = await posts
             .Select(p => new PostDto
             {
                 Id = p.PostId,
@@ -92,7 +89,7 @@ public class PostsController : ControllerBase
                 Body = p.Body,
                 UserId = p.UserId
             })
-            .ToList();
+            .ToListAsync();
         return Ok(dtos);
     }
     

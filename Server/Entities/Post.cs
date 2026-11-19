@@ -6,6 +6,12 @@ public class Post
     public string Title { get; set; }
     public string Body { get; set; }
     public int UserId { get; set; } 
+    
+    public User User { get; set; } = null!;
+    public List<Comment> Comments { get; set; } = new();
+    
+    public Post(){} // for the EFC
+    
     public Post(int postId, string title, string body, int userId)
     {
         PostId = postId;

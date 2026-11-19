@@ -3,6 +3,8 @@ using APIContracts.PostsDtos;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContracts;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace WebApi.Controllers;
 
@@ -42,8 +44,8 @@ public class CommentsController : ControllerBase
     public async Task<ActionResult> UpdateComment([FromRoute] int id ,[FromBody] UpdateCommentDto request)
     {
         Comment existing = await commentRepository.GetSingleAsync(id);
-        Comment comment = new(id, request.Body, existing.UserId, existing.PostId);
-        await commentRepository.UpdateAsync(comment);
+        existing.Body = request.Body;
+        await commentRepository.UpdateAsync(existing);
         return NoContent();
     }
     
@@ -62,31 +64,27 @@ public class CommentsController : ControllerBase
     }
     
     [HttpGet]
-    public ActionResult<IEnumerable<CommentDto>> GetMany(
+    public async Task<ActionResult<IEnumerable<CommentDto>>> GetMany(
         [FromQuery] int? postId,
         [FromQuery] int? userId,
         [FromQuery] string? userName)
     {
         IQueryable<Comment> comments = commentRepository.GetMany();
-        
+
         if (!string.IsNullOrWhiteSpace(userName))
         {
-            List<int> userIds = userRepository.GetMany()
-                .Where(u => u.Name == userName)
-                .Select(u => u.UserId)
-                .ToList();
-            comments = comments.Where(p => userIds.Contains(p.UserId));
+            comments = comments.Where(c => c.User.Name == userName);
         }
         if (postId is not null)
         {
             comments = comments.Where(c => c.PostId == postId);
         }
-
         if (userId is not null)
         {
             comments = comments.Where(c => c.UserId == userId);
         }
-        List<CommentDto> dtos = comments
+
+        List<CommentDto> dtos = await comments
             .Select(c => new CommentDto
             {
                 Id = c.CommentId,
@@ -94,7 +92,7 @@ public class CommentsController : ControllerBase
                 UserId = c.UserId,
                 PostId = c.PostId
             })
-            .ToList();
+            .ToListAsync();
         return Ok(dtos);
     }
     

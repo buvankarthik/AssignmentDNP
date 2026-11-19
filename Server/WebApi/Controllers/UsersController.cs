@@ -2,6 +2,7 @@
 using Entities;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApi.Controllers;
 
@@ -55,19 +56,18 @@ public class UsersController : ControllerBase
     }
     
     [HttpGet]
-    public ActionResult<IEnumerable<UserDto>> GetMany([FromQuery] string? nameContains)
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetMany([FromQuery] string? nameContains)
     {
         IQueryable<User> users = userRepository.GetMany();
 
         if (!string.IsNullOrWhiteSpace(nameContains))
         {
-            users = users.Where(u =>
-                u.Name.Contains(nameContains, StringComparison.OrdinalIgnoreCase));
+            users = users.Where(u => u.Name.ToLower().Contains(nameContains.ToLower()));
         }
 
-        List<UserDto> dtos = users
+        List<UserDto> dtos = await users
             .Select(u => new UserDto { Id = u.UserId, UserName = u.Name })
-            .ToList();
+            .ToListAsync();
 
         return Ok(dtos);
     }
@@ -79,14 +79,13 @@ public class UsersController : ControllerBase
             return NoContent();
     }
     
-    private Task VerifyUserNameIsAvailableAsync(string userName, int? ignoreUserId = null )
+    private async Task VerifyUserNameIsAvailableAsync(string userName, int? ignoreUserId = null)
     {
-        bool taken = userRepository.GetMany().Any(u => u.Name == userName && u.UserId != ignoreUserId);
+        bool taken = await userRepository.GetMany().AnyAsync(u => u.Name == userName && u.UserId != ignoreUserId);
         if (taken)
         {
             throw new InvalidOperationException($"Username '{userName}' is already taken.");
         }
-        return Task.CompletedTask;
     }
     
 }
